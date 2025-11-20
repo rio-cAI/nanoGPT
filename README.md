@@ -40,6 +40,15 @@ This creates a `train.bin` and `val.bin` in that data directory. Now it is time 
 ```sh
 python train.py config/train_shakespeare_char.py
 ```
+Troubleshooting:
+If you encounter a compile error when running the training script, it is likely related to PyTorch 2.0's `torch.compile()` feature, which may not be supported on all platforms (especially Windows). To resolve this, add the `--compile=False` flag to your command. This disables compilation and should allow the code to run, though it may be slower.
+
+Example:
+```sh
+python train.py config/train_shakespeare_char.py --compile=False
+```
+
+If you continue to experience issues, ensure your PyTorch installation matches the requirements and consult the [PyTorch documentation](https://pytorch.org/get-started/locally/) for troubleshooting tips.
 
 If you peek inside it, you'll see that we're training a GPT with a context size of up to 256 characters, 384 feature channels, and it is a 6-layer Transformer with 6 heads in each layer. On one A100 GPU this training run takes about 3 minutes and the best validation loss is 1.4697. Based on the configuration, the model checkpoints are being written into the `--out_dir` directory `out-shakespeare-char`. So once the training finishes we can sample from the best model by pointing the sampling script at this directory:
 

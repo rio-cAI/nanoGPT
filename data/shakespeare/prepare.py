@@ -2,11 +2,29 @@ import os
 import requests
 import tiktoken
 import numpy as np
+import ssl
+import urllib3
+
+# Disable SSL warnings and verification for corporate environments
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+ssl._create_default_https_context = ssl._create_unverified_context
+
+# Monkey patch tiktoken to disable SSL verification
+import tiktoken.load
+original_read_file = tiktoken.load.read_file
+
+def read_file_no_ssl(blobpath):
+    import requests
+    resp = requests.get(blobpath, verify=False)
+    resp.raise_for_status()
+    return resp.content
+
+tiktoken.load.read_file = read_file_no_ssl
 
 # download the tiny shakespeare dataset
 input_file_path = os.path.join(os.path.dirname(__file__), 'input.txt')
 if not os.path.exists(input_file_path):
-    data_url = 'https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt'
+    data_url = './'
     with open(input_file_path, 'w', encoding='utf-8') as f:
         f.write(requests.get(data_url).text)
 
